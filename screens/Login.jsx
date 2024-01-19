@@ -33,7 +33,14 @@ const Login = () => {
       .then((res) => {
         console.log(res.data.data.token);
         SecureStore.setItemAsync("token", res.data.data.token);
-        dispatch({ type: "login/login", payload: res.data.data.user.account });
+        SecureStore.setItemAsync(
+          "user",
+          `${res.data.data.user.account.firstName} ${res.data.data.user.account.lastName}`
+        );
+        dispatch({
+          type: "login/login",
+          payload: `${res.data.data.user.account.firstName} ${res.data.data.user.account.lastName}`
+        });
         if (res.data.data.token) {
           navigator.navigate("Home");
         } else {

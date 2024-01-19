@@ -13,12 +13,9 @@ import moment from "moment";
 import { Modal, Portal } from "react-native-paper";
 import * as SecureStore from "expo-secure-store";
 import { useNavigation } from "@react-navigation/native";
-import { useSelector, useDispatch } from "react-redux";
 
 const Home = () => {
   const navigator = useNavigation();
-  const dispatch = useDispatch();
-  const user = useSelector((state) => state.login.user);
   const [visible, setVisible] = useState(false);
   const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
@@ -29,6 +26,10 @@ const Home = () => {
   const [time, setTime] = useState(moment());
   const [hours, setHours] = useState(time.format("HH"));
   const [minutes, setMinutes] = useState(time.format("mm"));
+  const [selected, setSelected] = useState({
+    date: false,
+    time: false
+  });
 
   const handleMonthChange = (month) => {
     setCurrentMonth((current) => {
@@ -59,11 +60,12 @@ const Home = () => {
 
     return calendarWeeks;
   };
-  // const calendarWeeks = generateCalendar();
+
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   useEffect(() => {
     setCalendarWeeks(generateCalendar());
   }, [currentMonth]);
+
   return (
     <View>
       <View
@@ -94,7 +96,7 @@ const Home = () => {
               color: "gray"
             }}
           >
-            {selectedDate.format("DD MMM YYYY")}
+            {selected.date ? selectedDate.format("DD MMM YYYY") : "Select Date"}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -117,12 +119,15 @@ const Home = () => {
               color: "gray"
             }}
           >
-            {`${hours.toString().padStart(2, "0")}:${minutes
-              .toString()
-              .padStart(2, "0")}`}
+            {selected.time
+              ? `${hours.toString().padStart(2, "0")}:${minutes
+                  .toString()
+                  .padStart(2, "0")}`
+              : "Select Time"}
           </Text>
         </TouchableOpacity>
       </View>
+
       <Portal>
         <Modal
           visible={visible}
@@ -196,6 +201,7 @@ const Home = () => {
                         <TouchableOpacity
                           onPress={() => {
                             setSelectedDate(day);
+                            setSelected({ ...selected, date: true });
                             hideModal();
                           }}
                           key={day.format("DD-MM-YYYY")}
@@ -250,6 +256,7 @@ const Home = () => {
                   onPress={() => {
                     setHours(hour);
                     setMinutes(minute);
+                    setSelected({ ...selected, time: true });
                     setTimeVisible(false);
                   }}
                   style={{
@@ -271,6 +278,7 @@ const Home = () => {
       <Pressable
         onPress={async () => {
           await SecureStore.deleteItemAsync("token");
+          await SecureStore.deleteItemAsync("user");
           navigator.navigate("Login");
         }}
         style={{

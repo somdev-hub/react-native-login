@@ -20,7 +20,12 @@ const StackNavigator = () => {
   useEffect(() => {
     const checkToken = async () => {
       const token = await SecureStore.getItemAsync("token");
+      const user = await SecureStore.getItemAsync("user");
       if (token) {
+        dispatch({
+          type: "login/login",
+          payload: user
+        });
         navigator.navigate("Home");
       } else {
         navigator.navigate("Login");
@@ -41,7 +46,7 @@ const StackNavigator = () => {
         component={Home}
         options={{
           headerShown: true,
-          headerTitle: `Welcome ${user.firstName} ${user.lastName}`,
+          headerTitle: `Welcome ${user}`
         }}
       />
     </Stack.Navigator>
